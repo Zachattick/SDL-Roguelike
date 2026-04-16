@@ -11,20 +11,32 @@ int main(void)
     SDL_Event event;
     int running = 1;
     
+    SDL_Rect player = { 100, 100, 50, 50 };
+    
     while (running)
     {   
+
         while (SDL_PollEvent(&event))
         {
             if (event.type == SDL_QUIT)
                 running = 0;
+            else if (event.type == SDL_KEYDOWN)
+            {
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_w: player.y -= 5; break;
+                    case SDLK_s: player.y += 5; break;
+                    case SDLK_a: player.x -= 5; break;
+                    case SDLK_d: player.x += 5; break;
+                }
+            }
         }
         
         SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
         SDL_RenderClear(renderer);
         
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_Rect rect = { 100, 100, 50, 50 };
-        SDL_RenderFillRect(renderer, &rect);
+        SDL_RenderFillRect(renderer, &player);
 
         
         SDL_RenderPresent(renderer);
