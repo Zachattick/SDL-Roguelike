@@ -13,6 +13,9 @@ int main(void)
     
     SDL_Rect player = { 100, 100, 50, 50 };
     
+    int y_velocity = 0;
+    int x_velocity = 0;
+
     while (running)
     {   
 
@@ -24,14 +27,27 @@ int main(void)
             {
                 switch (event.key.keysym.sym)
                 {
-                    case SDLK_w: player.y -= 5; break;
-                    case SDLK_s: player.y += 5; break;
-                    case SDLK_a: player.x -= 5; break;
-                    case SDLK_d: player.x += 5; break;
+                    case SDLK_w: y_velocity = -5; break;
+                    case SDLK_s: y_velocity = 5; break;
+                    case SDLK_a: x_velocity = -5; break;
+                    case SDLK_d: x_velocity = 5; break;
                 }
             }
+            else if (event.type == SDL_KEYUP)
+            {
+                switch (event.key.keysym.sym)
+                {
+                    case SDLK_w: y_velocity = 0; break;
+                    case SDLK_s: y_velocity = 0; break;
+                    case SDLK_a: x_velocity = 0; break;
+                    case SDLK_d: x_velocity = 0; break;
+                }
+            }   
         }
         
+        player.x += x_velocity;
+        player.y += y_velocity;
+
         SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
         SDL_RenderClear(renderer);
         
