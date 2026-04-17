@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+
+#define PLAYER_SIZE 17
+
+
 struct Player {
     int x, y;
-    int width, height;
     int x_velocity, y_velocity;
     SDL_Rect rect;
 };
@@ -18,14 +23,14 @@ struct key_state {
 int main(void)
 {
     SDL_Init(SDL_INIT_VIDEO);
-    SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, 0);
+    SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
     
 
     SDL_Event event;
     int running = 1;
     
-    struct Player player = { 100, 100, 50, 50, 0, 0, {100, 100, 50, 50} };
+    struct Player player = { 100, 100, 0, 0, {100, 100, PLAYER_SIZE, PLAYER_SIZE} };
     
     struct key_state keys = {0, 0, 0, 0};
     int y_velocity = 0;
@@ -68,8 +73,10 @@ int main(void)
         if (keys.a_pressed) x_velocity -= 5;
         if (keys.d_pressed) x_velocity += 5;
 
-        player.x += x_velocity;
-        player.y += y_velocity;
+        if ((player.x + x_velocity) >= 0 && (player.x + x_velocity) <= WINDOW_WIDTH - PLAYER_SIZE)
+            player.x += x_velocity;
+        if ((player.y + y_velocity) >= 0 && (player.y + y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
+            player.y += y_velocity;
 
         player.rect.x = player.x;
         player.rect.y = player.y;
