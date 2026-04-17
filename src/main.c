@@ -1,14 +1,14 @@
 #include <stdio.h>
+#include <time.h>
 #include <SDL2/SDL.h>
 
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-#define PLAYER_SIZE 17
+#define PLAYER_SIZE 25
 
 
-struct Player {
-    int x, y;
+struct Character {
     int x_velocity, y_velocity;
     SDL_Rect rect;
 };
@@ -20,8 +20,15 @@ struct key_state {
     int d_pressed;
 };
 
+int rand_int(int min, int max)
+{
+    return (rand() % (max - min + 1)) + min;
+}
+
 int main(void)
 {
+    srand(time(NULL));
+
     SDL_Init(SDL_INIT_VIDEO);
     SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
@@ -30,11 +37,15 @@ int main(void)
     SDL_Event event;
     int running = 1;
     
-    struct Player player = { 100, 100, 0, 0, {100, 100, PLAYER_SIZE, PLAYER_SIZE} };
+    struct Character player = {0, 0, {100, 100, PLAYER_SIZE, PLAYER_SIZE}};
+
+
+    int enemy_x = rand_int(0, WINDOW_WIDTH-PLAYER_SIZE);
+    int enemy_y = rand_int(0, WINDOW_HEIGHT-PLAYER_SIZE);
+
+    struct Character enemy = {0, 0, {enemy_x, enemy_y, PLAYER_SIZE, PLAYER_SIZE}};
     
     struct key_state keys = {0, 0, 0, 0};
-    int y_velocity = 0;
-    int x_velocity = 0;
 
     while (running)
     {   
@@ -65,29 +76,31 @@ int main(void)
             }   
         }
 
-        x_velocity = 0;
-        y_velocity = 0;
+        player.x_velocity = 0;
+        player.y_velocity = 0;
 
-        if (keys.w_pressed) y_velocity -= 5;
-        if (keys.s_pressed) y_velocity += 5;
-        if (keys.a_pressed) x_velocity -= 5;
-        if (keys.d_pressed) x_velocity += 5;
+        if (keys.w_pressed) player.y_velocity -= 5;
+        if (keys.s_pressed) player.y_velocity += 5;
+        if (keys.a_pressed) player.x_velocity -= 5;
+        if (keys.d_pressed) player.x_velocity += 5;
 
-        if ((player.x + x_velocity) >= 0 && (player.x + x_velocity) <= WINDOW_WIDTH - PLAYER_SIZE)
-            player.x += x_velocity;
-        if ((player.y + y_velocity) >= 0 && (player.y + y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
-            player.y += y_velocity;
-
-        player.rect.x = player.x;
-        player.rect.y = player.y;
+        if ((player.rect.x + player.x_velocity) >= 0 && (player.rect.x + player.x_velocity) <= WINDOW_WIDTH - PLAYER_SIZE)
+            player.rect.x += player.x_velocity;
+        if ((player.rect.y + player.y_velocity) >= 0 && (player.rect.y + player.y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
+            player.rect.y += player.y_velocity;
 
         SDL_SetRenderDrawColor(renderer, 125, 125, 125, 255);
         SDL_RenderClear(renderer);
-        
+
+
+        // Draw enemy
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        SDL_RenderFillRect(renderer, &enemy.rect);
+
+        // Draw player
+        SDL_SetRenderDrawColor(renderer, 15, 255, 25, 255);
         SDL_RenderFillRect(renderer, &player.rect);
 
-        
         SDL_RenderPresent(renderer);
         SDL_Delay(16);
     }
