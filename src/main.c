@@ -59,23 +59,14 @@ int main(void)
                 }
             }   
         }
-        
 
-        if (keys.w_pressed) 
-        {
-            if (keys.s_pressed) y_velocity = 0;
-            else y_velocity = -5;
-        }
-        else if (keys.s_pressed) y_velocity = 5;
-        else y_velocity = 0;
+        x_velocity = 0;
+        y_velocity = 0;
 
-        if (keys.a_pressed)
-        {
-            if (keys.d_pressed) x_velocity = 0;
-            else x_velocity = -5;
-        }
-        else if (keys.d_pressed) x_velocity = 5;
-        else x_velocity = 0;
+        if (keys.w_pressed) y_velocity -= 5;
+        if (keys.s_pressed) y_velocity += 5;
+        if (keys.a_pressed) x_velocity -= 5;
+        if (keys.d_pressed) x_velocity += 5;
 
         player.x += x_velocity;
         player.y += y_velocity;
