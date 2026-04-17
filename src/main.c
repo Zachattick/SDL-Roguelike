@@ -25,6 +25,26 @@ int rand_int(int min, int max)
     return (rand() % (max - min + 1)) + min;
 }
 
+int check_collision(struct Character *a, struct Character *b)
+{
+    return (a->rect.x < b->rect.x + b->rect.w &&
+            a->rect.x + a->rect.w > b->rect.x &&
+            a->rect.y < b->rect.y + b->rect.h &&
+            a->rect.y + a->rect.h > b->rect.y);
+}
+
+void render_character(SDL_Renderer *renderer, struct Character *character, SDL_Color color)
+{
+    SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(renderer, &character->rect);
+}
+
+void randomly_position_enemy(struct Character *enemy)
+{
+    enemy->rect.x = rand_int(0, WINDOW_WIDTH - PLAYER_SIZE);
+    enemy->rect.y = rand_int(0, WINDOW_HEIGHT - PLAYER_SIZE);
+}
+
 int main(void)
 {
     srand(time(NULL));
@@ -35,18 +55,18 @@ int main(void)
     
 
     SDL_Event event;
-    int running = 1;
     
     struct Character player = {0, 0, {100, 100, PLAYER_SIZE, PLAYER_SIZE}};
-
-
-    int enemy_x = rand_int(0, WINDOW_WIDTH-PLAYER_SIZE);
-    int enemy_y = rand_int(0, WINDOW_HEIGHT-PLAYER_SIZE);
-
-    struct Character enemy = {0, 0, {enemy_x, enemy_y, PLAYER_SIZE, PLAYER_SIZE}};
+    struct Character enemy = {0, 0, {0, 0, PLAYER_SIZE, PLAYER_SIZE}};
+    
+    randomly_position_enemy(&enemy);
+    
     
     struct key_state keys = {0, 0, 0, 0};
+    
+    int score = 0;
 
+    int running = 1;
     while (running)
     {   
 
@@ -92,16 +112,20 @@ int main(void)
         SDL_SetRenderDrawColor(renderer, 125, 125, 125, 255);
         SDL_RenderClear(renderer);
 
+        if (check_collision(&player, &enemy))
+        {
+            randomly_position_enemy(&enemy);
+            score++;
+            printf("Score: %d\n", score);
+        }
 
         // Draw enemy
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_RenderFillRect(renderer, &enemy.rect);
-
+        render_character(renderer, &enemy, (SDL_Color){255, 0, 0, 255});
         // Draw player
-        SDL_SetRenderDrawColor(renderer, 15, 255, 25, 255);
-        SDL_RenderFillRect(renderer, &player.rect);
+        render_character(renderer, &player, (SDL_Color){15, 255, 25, 255});
 
         SDL_RenderPresent(renderer);
+
         SDL_Delay(16);
     }
     
