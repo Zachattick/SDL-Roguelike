@@ -74,7 +74,7 @@ int main(void)
         player.rect.x = player.x;
         player.rect.y = player.y;
 
-        SDL_SetRenderDrawColor(renderer, 200, 200, 200, 255);
+        SDL_SetRenderDrawColor(renderer, 125, 125, 125, 255);
         SDL_RenderClear(renderer);
         
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
