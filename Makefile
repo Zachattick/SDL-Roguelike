@@ -1,6 +1,6 @@
 CC = cc
 CFLAGS = $(shell sdl2-config --cflags)
-LDFLAGS = $(shell sdl2-config --libs)
+LDFLAGS = $(shell sdl2-config --libs) -lSDL2_ttf
 
 TARGET = build/program
 SRC = src/main.c
