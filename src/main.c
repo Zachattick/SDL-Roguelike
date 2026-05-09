@@ -43,7 +43,7 @@ void render_character(SDL_Renderer *renderer, struct Character *character, SDL_C
 void render_score(SDL_Renderer *renderer, TTF_Font *font, int score)
 {
     char score_int_string[20];
-    char score_string[20] = "Score:";
+    char score_string[20] = "Score";
     snprintf(score_int_string, sizeof(score_int_string), "%d", score);
 
     SDL_Surface *score_string_surface = TTF_RenderText_Solid(font, score_string, (SDL_Color){0, 0, 0, 0});
@@ -78,8 +78,8 @@ void render_score(SDL_Renderer *renderer, TTF_Font *font, int score)
     SDL_QueryTexture(text_texture, NULL, NULL, &tw, &th);
     SDL_QueryTexture(int_texture, NULL, NULL, &iw, &ih);
 
-    SDL_Rect text_rect = {25, 25, tw+10, th+10};
-    SDL_Rect int_rect = {text_rect.x + text_rect.w + 5, text_rect.y, iw+10, ih+10};
+    SDL_Rect text_rect = {(WINDOW_WIDTH/2) - (tw/2), 25, tw+10, th+10};
+    SDL_Rect int_rect = {(WINDOW_WIDTH/2) - (iw/2), text_rect.y + text_rect.h + 5, iw+10, ih+10};
     if (SDL_RenderCopy(renderer, text_texture, NULL, &text_rect) != 0)
     {   
         SDL_Log("SDL_RenderCopy Error: %s", SDL_GetError());
@@ -98,7 +98,6 @@ void randomly_position_enemy(struct Character *enemy)
     enemy->rect.x = rand_int(0, WINDOW_WIDTH - PLAYER_SIZE);
     enemy->rect.y = rand_int(0, WINDOW_HEIGHT - PLAYER_SIZE);
 }
-
 
 int main(void)
 {
@@ -122,7 +121,7 @@ int main(void)
         return 1;
     }
     
-    TTF_Font *font = TTF_OpenFont("assets/fonts/Morgenta.ttf", 24);
+    TTF_Font *font = TTF_OpenFont("assets/fonts/Morgenta.ttf", 16);
     if (!font) {
         printf("Error loading font: %s\n", TTF_GetError());
         return 1;
@@ -139,7 +138,7 @@ int main(void)
     
     struct key_state keys = {0, 0, 0, 0};
     
-
+    int automatic = 0;
     int running = 1;
     while (running)
     {   
@@ -157,6 +156,7 @@ int main(void)
                     case SDLK_s: keys.s_pressed = 1; break;
                     case SDLK_a: keys.a_pressed = 1; break;
                     case SDLK_d: keys.d_pressed = 1; break;
+                    case SDLK_COMMA: automatic = 1; break;
                 }
             }
             else if (event.type == SDL_KEYUP)
@@ -187,6 +187,20 @@ int main(void)
         if ((player.rect.y + player.y_velocity) >= 0 && (player.rect.y + player.y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
             player.rect.y += player.y_velocity;
 
+        if (automatic)
+        {
+            if (enemy.rect.x < player.rect.x)
+                enemy.rect.x += 3;
+            else if (enemy.rect.x > player.rect.x)
+                enemy.rect.x -= 3;
+
+            if (enemy.rect.y < player.rect.y)
+                enemy.rect.y += 3;
+            else if (enemy.rect.y > player.rect.y)
+                enemy.rect.y -= 3;
+        }
+
+
         // Check collision
         if (check_collision(&player, &enemy))
         {
@@ -206,10 +220,10 @@ int main(void)
         render_character(renderer, &player, (SDL_Color){15, 255, 25, 255});
         // Draw score
         render_score(renderer, font, score);
-        
+
         SDL_RenderPresent(renderer);
 
-        SDL_Delay(16);
+        SDL_Delay(16); // ~60 FPS
     }
     
     TTF_CloseFont(font);
