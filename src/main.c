@@ -42,31 +42,54 @@ void render_character(SDL_Renderer *renderer, struct Character *character, SDL_C
 
 void render_score(SDL_Renderer *renderer, TTF_Font *font, int score)
 {
-    char score_text[20];
-    snprintf(score_text, sizeof(score_text), "Score: %d", score);
+    char score_int_string[20];
+    char score_string[20] = "Score:";
+    snprintf(score_int_string, sizeof(score_int_string), "%d", score);
 
-    SDL_Surface *text_surface = TTF_RenderText_Solid(font, score_text, (SDL_Color){0, 0, 0, 0});
-    if (!text_surface) {
+    SDL_Surface *score_string_surface = TTF_RenderText_Solid(font, score_string, (SDL_Color){0, 0, 0, 0});
+    if (score_string_surface == NULL) {
         printf("Error creating text surface: %s\n", TTF_GetError());
         return;
     }
-    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, text_surface);
-    if (!text_texture) {
-        printf("Error creating text texture: %s\n", SDL_GetError());
-        SDL_FreeSurface(text_surface);
+    SDL_Surface *score_int_surface = TTF_RenderText_Solid(font, score_int_string, (SDL_Color){0, 0, 0, 0});
+    if (score_int_surface == NULL) {
+        printf("Error creating text surface: %s\n", TTF_GetError());
         return;
     }
-    SDL_FreeSurface(text_surface);
 
-    int w, h;
-    SDL_QueryTexture(text_texture, NULL, NULL, &w, &h);
+    SDL_Texture *text_texture = SDL_CreateTextureFromSurface(renderer, score_string_surface);
+    if (text_texture == NULL) {
+        printf("Error creating text texture: %s\n", SDL_GetError());
+        SDL_FreeSurface(score_string_surface);
+        return;
+    }
+    SDL_Texture *int_texture = SDL_CreateTextureFromSurface(renderer, score_int_surface);
+    if (int_texture == NULL) {
+        printf("Error creating text texture: %s\n", SDL_GetError());
+        SDL_FreeSurface(score_int_surface);
+        return;
+    }
 
-    SDL_Rect text_rect = {25, 25, w+10, h+10};
+    SDL_FreeSurface(score_string_surface);
+    SDL_FreeSurface(score_int_surface);
+
+    int tw, th;
+    int iw, ih;
+    SDL_QueryTexture(text_texture, NULL, NULL, &tw, &th);
+    SDL_QueryTexture(int_texture, NULL, NULL, &iw, &ih);
+
+    SDL_Rect text_rect = {25, 25, tw+10, th+10};
+    SDL_Rect int_rect = {text_rect.x + text_rect.w + 5, text_rect.y, iw+10, ih+10};
     if (SDL_RenderCopy(renderer, text_texture, NULL, &text_rect) != 0)
     {   
         SDL_Log("SDL_RenderCopy Error: %s", SDL_GetError());
     }
+    if (SDL_RenderCopy(renderer, int_texture, NULL, &int_rect) != 0)
+    {   
+        SDL_Log("SDL_RenderCopy Error: %s", SDL_GetError());
+    }
     SDL_DestroyTexture(text_texture);
+    SDL_DestroyTexture(int_texture);
 }
 
 
