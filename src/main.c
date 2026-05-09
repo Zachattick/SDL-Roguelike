@@ -44,7 +44,8 @@ void render_score(SDL_Renderer *renderer, TTF_Font *font, int score)
 {
     char score_text[20];
     snprintf(score_text, sizeof(score_text), "Score: %d", score);
-    SDL_Surface *text_surface = TTF_RenderText_Blended(font, score_text, (SDL_Color){0, 0, 0, 0});
+
+    SDL_Surface *text_surface = TTF_RenderText_Solid(font, score_text, (SDL_Color){0, 0, 0, 0});
     if (!text_surface) {
         printf("Error creating text surface: %s\n", TTF_GetError());
         return;
@@ -57,13 +58,17 @@ void render_score(SDL_Renderer *renderer, TTF_Font *font, int score)
     }
     SDL_FreeSurface(text_surface);
 
-    SDL_Rect text_rect = {25, 25, 100, 25};
+    int w, h;
+    SDL_QueryTexture(text_texture, NULL, NULL, &w, &h);
+
+    SDL_Rect text_rect = {25, 25, w+10, h+10};
     if (SDL_RenderCopy(renderer, text_texture, NULL, &text_rect) != 0)
     {   
         SDL_Log("SDL_RenderCopy Error: %s", SDL_GetError());
     }
     SDL_DestroyTexture(text_texture);
 }
+
 
 void randomly_position_enemy(struct Character *enemy)
 {
@@ -178,7 +183,7 @@ int main(void)
         render_character(renderer, &player, (SDL_Color){15, 255, 25, 255});
         // Draw score
         render_score(renderer, font, score);
-
+        
         SDL_RenderPresent(renderer);
 
         SDL_Delay(16);
