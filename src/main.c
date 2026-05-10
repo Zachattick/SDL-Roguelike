@@ -3,14 +3,20 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
+#define DEFAULT_FPS 60
 #define WINDOW_WIDTH 640
 #define WINDOW_HEIGHT 480
 
-#define PLAYER_SIZE 25
+#define PLAYER_SIZE 30
+#define ENEMY_SIZE 25
 
+#define DEFAULT_PLAYER_SPEED 2.0
+#define DEFAULT_ENEMY_SPEED 0.8
 
 struct Character {
-    int x_velocity, y_velocity;
+    float movement_speed;
+    float x_position, y_position;
+    float x_velocity, y_velocity;
     SDL_Rect rect;
 };
 
@@ -28,14 +34,17 @@ int rand_int(int min, int max)
 
 int check_collision(struct Character *a, struct Character *b)
 {
-    return (a->rect.x < b->rect.x + b->rect.w &&
-            a->rect.x + a->rect.w > b->rect.x &&
-            a->rect.y < b->rect.y + b->rect.h &&
-            a->rect.y + a->rect.h > b->rect.y);
+    return (a->x_position < b->x_position + b->rect.w &&
+            a->x_position + a->rect.w > b->x_position &&
+            a->y_position < b->y_position + b->rect.h &&
+            a->y_position + a->rect.h > b->y_position);
 }
 
 void render_character(SDL_Renderer *renderer, struct Character *character, SDL_Color color)
 {
+    character->rect.x = character->x_position;
+    character->rect.y = character->y_position;
+
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(renderer, &character->rect);
 }
@@ -95,19 +104,19 @@ void render_score(SDL_Renderer *renderer, TTF_Font *font, int score)
 
 void randomly_position_enemy(struct Character *enemy)
 {
-    enemy->rect.x = rand_int(0, WINDOW_WIDTH - PLAYER_SIZE);
-    enemy->rect.y = rand_int(0, WINDOW_HEIGHT - PLAYER_SIZE);
+    enemy->x_position = rand_int(0, WINDOW_WIDTH - ENEMY_SIZE);
+    enemy->y_position = rand_int(0, WINDOW_HEIGHT - ENEMY_SIZE);
 }
 
 int main(void)
 {
+    // Initialization
     srand(time(NULL));
-
-    SDL_Color bg_color = {125, 125, 125, 255};
-    int score = 0;
-
     printf("SDL_Init(): %s\n", SDL_Init(SDL_INIT_VIDEO) == 0 ? "Success" : "Error");
     printf("TTF_Init(): %s\n", TTF_Init() == 0 ? "Success" : "Error");
+
+    // Window and Renderer Setup
+    SDL_Color bg_color = {125, 125, 125, 255};
 
     SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if (!window) {
@@ -127,19 +136,46 @@ int main(void)
         return 1;
     }
 
-    SDL_Event event;
     
+    // Game Setup
+    struct Character player = {
+        .movement_speed = DEFAULT_PLAYER_SPEED,
+        .x_velocity = 0,
+        .y_velocity = 0,
+        .x_position = 100,
+        .y_position = 100,
+        .rect = {
+            .x = player.x_position,
+            .y = player.y_position,
+            .w = PLAYER_SIZE,
+            .h = PLAYER_SIZE
+        }
+    };
+    struct Character enemy = {
+        .movement_speed = DEFAULT_ENEMY_SPEED,
+        .x_velocity = 0,
+        .y_velocity = 0,
+        .x_position = 0,
+        .y_position = 0,
+        .rect = {
+            .x = enemy.x_position,
+            .y = enemy.y_position,
+            .w = ENEMY_SIZE,
+            .h = ENEMY_SIZE
+        }
+    };
 
-    struct Character player = {0, 0, {100, 100, PLAYER_SIZE, PLAYER_SIZE}};
-    struct Character enemy = {0, 0, {0, 0, PLAYER_SIZE, PLAYER_SIZE}};
-    
+    SDL_Event event;
     randomly_position_enemy(&enemy);
-    
-    
+
+    // Varibale Setup
     struct key_state keys = {0, 0, 0, 0};
+    int score = 0;
     
     int automatic = 0;
     int running = 1;
+
+    // Main game loop
     while (running)
     {   
 
@@ -156,7 +192,7 @@ int main(void)
                     case SDLK_s: keys.s_pressed = 1; break;
                     case SDLK_a: keys.a_pressed = 1; break;
                     case SDLK_d: keys.d_pressed = 1; break;
-                    case SDLK_COMMA: automatic = 1; break;
+                    case SDLK_COMMA: automatic = 1; printf("Automatic mode enabled\n"); break;
                 }
             }
             else if (event.type == SDL_KEYUP)
@@ -176,28 +212,46 @@ int main(void)
         // Move player
         player.x_velocity = 0;
         player.y_velocity = 0;
+        enemy.x_velocity = 0;
+        enemy.y_velocity = 0;
 
-        if (keys.w_pressed) player.y_velocity -= 5;
-        if (keys.s_pressed) player.y_velocity += 5;
-        if (keys.a_pressed) player.x_velocity -= 5;
-        if (keys.d_pressed) player.x_velocity += 5;
+        if (keys.w_pressed) player.y_velocity -= player.movement_speed;
+        if (keys.s_pressed) player.y_velocity += player.movement_speed;
+        if (keys.a_pressed) player.x_velocity -= player.movement_speed;
+        if (keys.d_pressed) player.x_velocity += player.movement_speed;
+        
+        // If player is inside the window.
+        if ((player.x_position + player.x_velocity) >= 0 && (player.x_position + player.x_velocity) <= WINDOW_WIDTH - PLAYER_SIZE)
+            player.x_position += player.x_velocity; printf("Player: x_velocity: %.2f\n", player.x_velocity);
+        if ((player.y_position + player.y_velocity) >= 0 && (player.y_position + player.y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
+            player.y_position += player.y_velocity; printf("Player: y_velocity: %.2f\n", player.y_velocity);
 
-        if ((player.rect.x + player.x_velocity) >= 0 && (player.rect.x + player.x_velocity) <= WINDOW_WIDTH - PLAYER_SIZE)
-            player.rect.x += player.x_velocity;
-        if ((player.rect.y + player.y_velocity) >= 0 && (player.rect.y + player.y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
-            player.rect.y += player.y_velocity;
-
-        if (automatic)
+        if (automatic) // Vacuum enemy towards player
         {
-            if (enemy.rect.x < player.rect.x)
-                enemy.rect.x += 3;
-            else if (enemy.rect.x > player.rect.x)
-                enemy.rect.x -= 3;
+            float distance_x = (enemy.x_position + ENEMY_SIZE/2) - (player.x_position + PLAYER_SIZE/2);
+            float distance_y = (enemy.y_position + ENEMY_SIZE/2) - (player.y_position + PLAYER_SIZE/2);
+            
+            if (distance_x > 0) // Enemy is to the right of player, move left
+            {
+                enemy.x_velocity -= (distance_x < enemy.movement_speed) ? distance_x : enemy.movement_speed;
+            }
+            else if (distance_x < 0) // Enemy is to the left of player, move right
+            {
+                enemy.x_velocity += (distance_x > enemy.movement_speed) ? distance_x : enemy.movement_speed;
+            }
 
-            if (enemy.rect.y < player.rect.y)
-                enemy.rect.y += 3;
-            else if (enemy.rect.y > player.rect.y)
-                enemy.rect.y -= 3;
+            if (distance_y > 0) // Enemy is below player, move up
+            {
+                enemy.y_velocity -= (distance_y < enemy.movement_speed) ? distance_y : enemy.movement_speed;
+            }
+            else if (distance_y < 0) // Enemy is above player, move down
+            {
+                enemy.y_velocity += (distance_y > enemy.movement_speed) ? distance_y : enemy.movement_speed;
+            }
+
+            // Move enemy
+            enemy.x_position += enemy.x_velocity; printf("Enemy: x_velocity: %.2f\n", enemy.x_velocity);
+            enemy.y_position += enemy.y_velocity; printf("Enemy: y_velocity: %.2f\n", enemy.y_velocity);
         }
 
 
