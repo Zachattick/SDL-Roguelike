@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
@@ -10,7 +11,7 @@
 #define PLAYER_SIZE 30
 #define ENEMY_SIZE 25
 
-#define DEFAULT_PLAYER_SPEED 2.0
+#define DEFAULT_PLAYER_SPEED 2.3
 #define DEFAULT_ENEMY_SPEED 0.8
 
 struct Character {
@@ -215,17 +216,34 @@ int main(void)
         enemy.x_velocity = 0;
         enemy.y_velocity = 0;
 
-        if (keys.w_pressed) player.y_velocity -= player.movement_speed;
-        if (keys.s_pressed) player.y_velocity += player.movement_speed;
-        if (keys.a_pressed) player.x_velocity -= player.movement_speed;
-        if (keys.d_pressed) player.x_velocity += player.movement_speed;
-        
-        // If player is inside the window.
+        float dx = 0;
+        float dy = 0;
+
+        if (keys.w_pressed) dy -= 1;
+        if (keys.s_pressed) dy += 1;
+        if (keys.a_pressed) dx -= 1;
+        if (keys.d_pressed) dx += 1;
+
+        float length = sqrtf((dx * dx) + (dy * dy));
+
+        if (length != 0)
+        {
+            dx /= length;
+            dy /= length;
+        }
+
+        // printf("%f\n", dx);
+        // printf("%f\n", dy);
+
+        player.x_velocity = dx * player.movement_speed;
+        player.y_velocity = dy * player.movement_speed;
+
+        // Move player, If player is inside the window.
         if ((player.x_position + player.x_velocity) >= 0 && (player.x_position + player.x_velocity) <= WINDOW_WIDTH - PLAYER_SIZE)
             player.x_position += player.x_velocity; printf("Player: x_velocity: %.2f\n", player.x_velocity);
         if ((player.y_position + player.y_velocity) >= 0 && (player.y_position + player.y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
             player.y_position += player.y_velocity; printf("Player: y_velocity: %.2f\n", player.y_velocity);
-
+        
         if (automatic) // Vacuum enemy towards player
         {
             float distance_x = (enemy.x_position + ENEMY_SIZE/2) - (player.x_position + PLAYER_SIZE/2);
