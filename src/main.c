@@ -11,8 +11,8 @@
 #define PLAYER_SIZE 30
 #define ENEMY_SIZE 25
 
-#define DEFAULT_PLAYER_SPEED 2.3
-#define DEFAULT_ENEMY_SPEED 0.8
+#define DEFAULT_PLAYER_SPEED 300.0
+#define DEFAULT_ENEMY_SPEED 150.0
 
 struct Character {
     float movement_speed;
@@ -169,16 +169,30 @@ int main(void)
     SDL_Event event;
     randomly_position_enemy(&enemy);
 
-    // Varibale Setup
+    // Variable Setup
     struct key_state keys = {0, 0, 0, 0};
     int score = 0;
-    
     int automatic = 0;
+    
+    uint64_t frame_start = SDL_GetPerformanceCounter();
+    uint64_t last_frame_time = SDL_GetPerformanceCounter();
+    long long frequency = SDL_GetPerformanceFrequency();
+    float delta_time = 0;
+
     int running = 1;
 
     // Main game loop
     while (running)
     {   
+        frame_start = SDL_GetPerformanceCounter();
+        delta_time = (float)(frame_start - last_frame_time) / frequency;
+        last_frame_time = frame_start;
+
+        if (delta_time > 0.5f) // Cap delta time to prevent extreme values
+            delta_time = 0.5f;
+
+        printf("Delta Time: %f\n", delta_time);
+
 
         while (SDL_PollEvent(&event))
         {
@@ -213,8 +227,6 @@ int main(void)
         // Move player
         player.x_velocity = 0;
         player.y_velocity = 0;
-        enemy.x_velocity = 0;
-        enemy.y_velocity = 0;
 
         float dx = 0;
         float dy = 0;
@@ -239,38 +251,10 @@ int main(void)
         player.y_velocity = dy * player.movement_speed;
 
         // Move player, If player is inside the window.
-        if ((player.x_position + player.x_velocity) >= 0 && (player.x_position + player.x_velocity) <= WINDOW_WIDTH - PLAYER_SIZE)
-            player.x_position += player.x_velocity; printf("Player: x_velocity: %.2f\n", player.x_velocity);
-        if ((player.y_position + player.y_velocity) >= 0 && (player.y_position + player.y_velocity) <= WINDOW_HEIGHT - PLAYER_SIZE)
-            player.y_position += player.y_velocity; printf("Player: y_velocity: %.2f\n", player.y_velocity);
-        
-        if (automatic) // Vacuum enemy towards player
-        {
-            float distance_x = (enemy.x_position + ENEMY_SIZE/2) - (player.x_position + PLAYER_SIZE/2);
-            float distance_y = (enemy.y_position + ENEMY_SIZE/2) - (player.y_position + PLAYER_SIZE/2);
-            
-            if (distance_x > 0) // Enemy is to the right of player, move left
-            {
-                enemy.x_velocity -= (distance_x < enemy.movement_speed) ? distance_x : enemy.movement_speed;
-            }
-            else if (distance_x < 0) // Enemy is to the left of player, move right
-            {
-                enemy.x_velocity += (distance_x > enemy.movement_speed) ? distance_x : enemy.movement_speed;
-            }
-
-            if (distance_y > 0) // Enemy is below player, move up
-            {
-                enemy.y_velocity -= (distance_y < enemy.movement_speed) ? distance_y : enemy.movement_speed;
-            }
-            else if (distance_y < 0) // Enemy is above player, move down
-            {
-                enemy.y_velocity += (distance_y > enemy.movement_speed) ? distance_y : enemy.movement_speed;
-            }
-
-            // Move enemy
-            enemy.x_position += enemy.x_velocity; printf("Enemy: x_velocity: %.2f\n", enemy.x_velocity);
-            enemy.y_position += enemy.y_velocity; printf("Enemy: y_velocity: %.2f\n", enemy.y_velocity);
-        }
+        if ((player.x_position + player.x_velocity * delta_time) >= 0 && (player.x_position + player.x_velocity * delta_time) <= WINDOW_WIDTH - PLAYER_SIZE)
+            player.x_position += player.x_velocity * delta_time; 
+        if ((player.y_position + player.y_velocity * delta_time) >= 0 && (player.y_position + player.y_velocity * delta_time) <= WINDOW_HEIGHT - PLAYER_SIZE)
+            player.y_position += player.y_velocity * delta_time; 
 
 
         // Check collision
