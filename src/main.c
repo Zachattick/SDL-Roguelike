@@ -124,7 +124,7 @@ int main(void)
         printf("Error creating window: %s\n", SDL_GetError());
         return 1;
     }
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, 0);
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
     if (!renderer) {
         printf("Error creating renderer: %s\n", SDL_GetError());
         SDL_DestroyWindow(window);
@@ -278,8 +278,6 @@ int main(void)
         render_score(renderer, font, score);
 
         SDL_RenderPresent(renderer);
-
-        SDL_Delay(16); // ~60 FPS
     }
     
     TTF_CloseFont(font);
