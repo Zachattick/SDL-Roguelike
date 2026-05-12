@@ -1,0 +1,14 @@
+#ifndef CONFIG_H
+#define CONFIG_H
+
+#define DEFAULT_FPS 60
+#define WINDOW_WIDTH 640
+#define WINDOW_HEIGHT 480
+
+#define PLAYER_SIZE 30
+#define ENEMY_SIZE 25
+
+#define DEFAULT_PLAYER_SPEED 300.0
+#define DEFAULT_ENEMY_SPEED 150.0
+
+#endif
