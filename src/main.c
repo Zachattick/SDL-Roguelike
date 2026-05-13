@@ -12,6 +12,7 @@
 #include "config.h"
 #include "player.h"
 #include "enemy.h"
+#include "movement.h"
 
 int main(void)
 {
@@ -114,9 +115,6 @@ int main(void)
         // Player movement logic
 
         // Move player
-        player.x_velocity = 0;
-        player.y_velocity = 0;
-
         float dx = 0;
         float dy = 0;
 
@@ -125,25 +123,15 @@ int main(void)
         if (keys.a_pressed) dx -= 1;
         if (keys.d_pressed) dx += 1;
 
-        float length = sqrtf((dx * dx) + (dy * dy));
-
-        if (length != 0)
-        {
-            dx /= length;
-            dy /= length;
-        }
-
-        // printf("%f\n", dx);
-        // printf("%f\n", dy);
-
-        player.x_velocity = dx * player.movement_speed;
-        player.y_velocity = dy * player.movement_speed;
-
         // Move player, If player is inside the window.
-        if ((player.x_position + player.x_velocity * delta_time) >= 0 && (player.x_position + player.x_velocity * delta_time) <= WINDOW_WIDTH - PLAYER_SIZE)
-            player.x_position += player.x_velocity * delta_time; 
-        if ((player.y_position + player.y_velocity * delta_time) >= 0 && (player.y_position + player.y_velocity * delta_time) <= WINDOW_HEIGHT - PLAYER_SIZE)
-            player.y_position += player.y_velocity * delta_time; 
+        float x_move = get_distance_to_move_on_x(&player, dx, dy, delta_time);
+        float y_move = get_distance_to_move_on_y(&player, dx, dy, delta_time);
+
+        if ((player.x_position + x_move) < 0 || (player.x_position + x_move) > WINDOW_WIDTH - PLAYER_SIZE)
+            dx = 0;
+        if ((player.y_position + y_move) < 0 || (player.y_position + y_move) > WINDOW_HEIGHT - PLAYER_SIZE)
+            dy = 0;
+        move_entity(&player, dx, dy, delta_time);
 
 
         // Check collision
