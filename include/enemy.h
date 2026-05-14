@@ -7,6 +7,6 @@
 
 
 void randomly_position_enemy(struct Entity *enemy);
-
+void move_enemy_towards_player(struct Entity *enemy, struct Entity *player, float dt);
 
 #endif

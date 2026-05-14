@@ -133,6 +133,8 @@ int main(void)
             dy = 0;
         move_entity(&player, dx, dy, delta_time);
 
+        // Move enemy towards player
+        move_enemy_towards_player(&enemy, &player, delta_time);
 
         // Check collision
         if (check_collision(&player, &enemy))
