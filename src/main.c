@@ -46,6 +46,7 @@ int main(void)
     
     // Game Setup
     struct Entity player = {
+        .alive = 1,
         .movement_speed = DEFAULT_PLAYER_SPEED,
         .x_velocity = 0,
         .y_velocity = 0,
@@ -54,6 +55,7 @@ int main(void)
         .size = PLAYER_SIZE
     };
     struct Entity enemy = {
+        .alive = 1,
         .movement_speed = DEFAULT_ENEMY_SPEED,
         .x_velocity = 0,
         .y_velocity = 0,
@@ -61,15 +63,9 @@ int main(void)
         .y_position = 0,
         .size = ENEMY_SIZE
     };
-    struct Entity projectile = {
-        .movement_speed = 5,
-        .x_velocity = 0,
-        .y_velocity = 0,
-        .x_position = -100,
-        .y_position = -100,
-        .size = 15
-    };
-    
+
+    struct Entity projectiles[MAX_PROJECTILES] = {0};
+
     randomly_position_entity(&enemy);
     randomly_position_entity(&player);
     
@@ -109,10 +105,11 @@ int main(void)
                     case SDLK_s: keys.s_pressed = 1; break;
                     case SDLK_a: keys.a_pressed = 1; break;
                     case SDLK_d: keys.d_pressed = 1; break;
-                    case SDLK_UP: shoot_projectile(&player, &projectile, 0, -1); break;
-                    case SDLK_DOWN: shoot_projectile(&player, &projectile, 0, 1); break;
-                    case SDLK_RIGHT: shoot_projectile(&player, &projectile, 1, 0); break;
-                    case SDLK_LEFT: shoot_projectile(&player, &projectile, -1, 0); break;
+                    case SDLK_UP: shoot_projectile(projectiles, &player, 0, -1); break;
+                    case SDLK_DOWN: shoot_projectile(projectiles, &player, 0, 1); break;
+                    case SDLK_RIGHT: shoot_projectile(projectiles, &player, 1, 0); break;
+                    case SDLK_LEFT: shoot_projectile(projectiles, &player, -1, 0); break;
+                    case SDLK_p: printf("DEBUG: Projectile count: %d\n", get_live_projectiles(projectiles));
                 }
             }
             else if (event.type == SDL_KEYUP)
@@ -151,7 +148,9 @@ int main(void)
 
 
         // Move Projectiles
-        update_projectile(&projectile);
+
+        update_projectiles(projectiles);
+
         // Move enemy towards player
         move_enemy_towards_player(&enemy, &player, delta_time);
 
@@ -160,10 +159,19 @@ int main(void)
         {
             printf("Game Over\n Score: %d\n", score);
         }
-        if (check_collision(&projectile, &enemy))
+        
+        // Bullet collision
+        for (int i = 0; i < MAX_PROJECTILES; i++)
         {
-            randomly_position_entity(&enemy);
-            score++;
+            if (projectiles[i].alive)
+            {
+                if (check_collision(&projectiles[i], &enemy))
+                {
+                    randomly_position_entity(&enemy);
+                    projectiles[i].alive = 0;
+                    score++;
+                }
+            }
         }
         // Draw everything
         
@@ -174,7 +182,11 @@ int main(void)
         // Draw player
         render_entity(renderer, &player, (SDL_Color){15, 255, 25, 255});
         // Draw projectiles
-        render_entity(renderer, &projectile, (SDL_Color){0, 0, 200, 255});
+        for (int i = 0; i < MAX_PROJECTILES; i++)
+        {   
+            if (projectiles[i].alive == 1)
+                render_entity(renderer, &projectiles[i], (SDL_Color){0, 0, 200, 255});
+        }
         // Draw score
         render_score(renderer, font, score);
 

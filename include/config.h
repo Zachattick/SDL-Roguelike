@@ -11,4 +11,6 @@
 #define DEFAULT_PLAYER_SPEED 300.0
 #define DEFAULT_ENEMY_SPEED 75.0
 
+#define MAX_PROJECTILES 5
+
 #endif

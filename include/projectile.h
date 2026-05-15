@@ -3,7 +3,10 @@
 
 #include "entity.h"
 
-void shoot_projectile(struct Entity *player, struct Entity *projectile, int dx, int dy);
+int shoot_projectile(struct Entity projectiles[], struct Entity *player, int dx, int dy);
 void update_projectile(struct Entity *projectile);
+void update_projectiles(struct Entity projectiles[]);
+int get_live_projectiles(struct Entity projectiles[]);
+int get_next_free_projectile_spot(struct Entity projectiles[]);
 
 #endif
