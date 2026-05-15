@@ -4,9 +4,8 @@
 #include "config.h"
 #include "entity.h"
 #include "utils.h"
+#include "movement.h"
 
-
-void randomly_position_enemy(struct Entity *enemy);
 void move_enemy_towards_player(struct Entity *enemy, struct Entity *player, float dt);
 
 #endif

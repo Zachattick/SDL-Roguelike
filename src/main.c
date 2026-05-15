@@ -60,21 +60,23 @@ int main(void)
         .y_position = 0,
         .size = ENEMY_SIZE
     };
-
-    SDL_Event event;
-    randomly_position_enemy(&enemy);
-
-    // Variable Setup
-    struct key_state keys = {0, 0, 0, 0};
-    int score = 0;
     
+    randomly_position_entity(&enemy);
+    randomly_position_entity(&player);
+    
+    // Delta time variables
     uint64_t frame_start = SDL_GetPerformanceCounter();
     uint64_t last_frame_time = SDL_GetPerformanceCounter();
     long long frequency = SDL_GetPerformanceFrequency();
     float delta_time = 0;
-
+    
+    // Variable Setup
+    SDL_Event event;
+    struct key_state keys = {0, 0, 0, 0};
+    int score = 0;
+    
     int running = 1;
-
+    
     // Main game loop
     while (running)
     {   
@@ -114,7 +116,6 @@ int main(void)
 
         // Player movement logic
 
-        // Move player
         float dx = 0;
         float dy = 0;
 
@@ -127,10 +128,12 @@ int main(void)
         float x_move = get_distance_to_move_on_x(&player, dx, dy, delta_time);
         float y_move = get_distance_to_move_on_y(&player, dx, dy, delta_time);
 
+        // TODO, this works, but player cant fully touch the wall.
         if ((player.x_position + x_move) < 0 || (player.x_position + x_move) > WINDOW_WIDTH - PLAYER_SIZE)
             dx = 0;
         if ((player.y_position + y_move) < 0 || (player.y_position + y_move) > WINDOW_HEIGHT - PLAYER_SIZE)
             dy = 0;
+
         move_entity(&player, dx, dy, delta_time);
 
         // Move enemy towards player
@@ -139,13 +142,12 @@ int main(void)
         // Check collision
         if (check_collision(&player, &enemy))
         {
-            randomly_position_enemy(&enemy);
+            randomly_position_entity(&enemy);
             score++;
         }
     
         // Draw everything
         
-    
         SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
         SDL_RenderClear(renderer);
         // Draw enemy

@@ -2,6 +2,8 @@
 #define ENTITY_H
 
 #include <SDL2/SDL.h>
+#include "config.h"
+#include "utils.h"
 
 struct Entity {
     float movement_speed;
@@ -10,7 +12,7 @@ struct Entity {
     float size;
 };
 
-
+void randomly_position_entity(struct Entity *entity);
 void render_entity(SDL_Renderer *renderer, struct Entity *entity, SDL_Color color);
 
 #endif
