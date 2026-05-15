@@ -79,6 +79,7 @@ int main(void)
     SDL_Event event;
     struct key_state keys = {0, 0, 0, 0};
     int score = 0;
+    float shooting_cooldown = 0;
     
     int running = 1;
     
@@ -105,11 +106,42 @@ int main(void)
                     case SDLK_s: keys.s_pressed = 1; break;
                     case SDLK_a: keys.a_pressed = 1; break;
                     case SDLK_d: keys.d_pressed = 1; break;
-                    case SDLK_UP: shoot_projectile(projectiles, &player, 0, -1); break;
-                    case SDLK_DOWN: shoot_projectile(projectiles, &player, 0, 1); break;
-                    case SDLK_RIGHT: shoot_projectile(projectiles, &player, 1, 0); break;
-                    case SDLK_LEFT: shoot_projectile(projectiles, &player, -1, 0); break;
-                    case SDLK_p: printf("DEBUG: Projectile count: %d\n", get_live_projectiles(projectiles));
+                    case SDLK_UP:
+                    {
+                        if (shooting_cooldown <= 0)
+                        {
+                            shoot_projectile(projectiles, &player, 0, -1); 
+                            shooting_cooldown = SHOOTING_COOLDOWN;
+                        }
+                        break;
+                    }
+                    case SDLK_DOWN:
+                    {
+                        if (shooting_cooldown <= 0)
+                        {
+                            shoot_projectile(projectiles, &player, 0, 1); 
+                            shooting_cooldown = SHOOTING_COOLDOWN;
+                        }
+                        break;
+                    }
+                    case SDLK_LEFT:
+                    {
+                        if (shooting_cooldown <= 0)
+                        {
+                            shoot_projectile(projectiles, &player, -1, 0); 
+                            shooting_cooldown = SHOOTING_COOLDOWN;
+                        }
+                        break;
+                    }
+                    case SDLK_RIGHT:
+                    {
+                        if (shooting_cooldown <= 0)
+                        {
+                            shoot_projectile(projectiles, &player, 1, 0); 
+                            shooting_cooldown = SHOOTING_COOLDOWN;
+                        }
+                        break;
+                    } 
                 }
             }
             else if (event.type == SDL_KEYUP)
@@ -123,7 +155,6 @@ int main(void)
                 }
             }   
         }
-
         // Player movement logic
 
         float dx = 0;
@@ -173,6 +204,14 @@ int main(void)
                 }
             }
         }
+        // Lower shooting cooldown
+
+        if (shooting_cooldown > 0)
+        {
+            shooting_cooldown -= delta_time*100;
+            if (shooting_cooldown < 0) shooting_cooldown = 0;
+        }
+
         // Draw everything
         
         SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
@@ -189,7 +228,6 @@ int main(void)
         }
         // Draw score
         render_score(renderer, font, score);
-
         SDL_RenderPresent(renderer);
     }
     
