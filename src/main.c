@@ -13,6 +13,7 @@
 #include "player.h"
 #include "enemy.h"
 #include "movement.h"
+#include "projectile.h"
 
 int main(void)
 {
@@ -60,6 +61,14 @@ int main(void)
         .y_position = 0,
         .size = ENEMY_SIZE
     };
+    struct Entity projectile = {
+        .movement_speed = 5,
+        .x_velocity = 0,
+        .y_velocity = 0,
+        .x_position = -100,
+        .y_position = -100,
+        .size = 15
+    };
     
     randomly_position_entity(&enemy);
     randomly_position_entity(&player);
@@ -100,6 +109,10 @@ int main(void)
                     case SDLK_s: keys.s_pressed = 1; break;
                     case SDLK_a: keys.a_pressed = 1; break;
                     case SDLK_d: keys.d_pressed = 1; break;
+                    case SDLK_UP: shoot_projectile(&player, &projectile, 0, -1); break;
+                    case SDLK_DOWN: shoot_projectile(&player, &projectile, 0, 1); break;
+                    case SDLK_RIGHT: shoot_projectile(&player, &projectile, 1, 0); break;
+                    case SDLK_LEFT: shoot_projectile(&player, &projectile, -1, 0); break;
                 }
             }
             else if (event.type == SDL_KEYUP)
@@ -136,16 +149,22 @@ int main(void)
 
         move_entity(&player, dx, dy, delta_time);
 
+
+        // Move Projectiles
+        update_projectile(&projectile);
         // Move enemy towards player
         move_enemy_towards_player(&enemy, &player, delta_time);
 
         // Check collision
         if (check_collision(&player, &enemy))
         {
+            printf("Game Over\n Score: %d\n", score);
+        }
+        if (check_collision(&projectile, &enemy))
+        {
             randomly_position_entity(&enemy);
             score++;
         }
-    
         // Draw everything
         
         SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
@@ -154,6 +173,8 @@ int main(void)
         render_entity(renderer, &enemy, (SDL_Color){255, 0, 0, 255});
         // Draw player
         render_entity(renderer, &player, (SDL_Color){15, 255, 25, 255});
+        // Draw projectiles
+        render_entity(renderer, &projectile, (SDL_Color){0, 0, 200, 255});
         // Draw score
         render_score(renderer, font, score);
 
