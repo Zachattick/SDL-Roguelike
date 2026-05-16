@@ -12,6 +12,6 @@
 #define DEFAULT_ENEMY_SPEED 75.0
 
 #define MAX_PROJECTILES 5
-#define SHOOTING_COOLDOWN 60 // Cooldown in FRAMES // 30 == 0.5sec
+#define SHOOTING_COOLDOWN 0.5 // Cooldown in Seconds
 
 #endif

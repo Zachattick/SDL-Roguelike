@@ -208,7 +208,7 @@ int main(void)
 
         if (shooting_cooldown > 0)
         {
-            shooting_cooldown -= delta_time*100;
+            shooting_cooldown -= delta_time;
             if (shooting_cooldown < 0) shooting_cooldown = 0;
         }
 
