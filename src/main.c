@@ -47,6 +47,8 @@ int main(void)
     // Game Setup
     struct Entity player = {
         .alive = 1,
+        .health = 5,
+        .damage = 1,
         .movement_speed = DEFAULT_PLAYER_SPEED,
         .x_velocity = 0,
         .y_velocity = 0,
@@ -56,6 +58,8 @@ int main(void)
     };
     struct Entity enemy = {
         .alive = 1,
+        .health = 3,
+        .damage = 1,
         .movement_speed = DEFAULT_ENEMY_SPEED,
         .x_velocity = 0,
         .y_velocity = 0,
@@ -80,7 +84,7 @@ int main(void)
     struct key_state keys = {0, 0, 0, 0};
     int score = 0;
     float shooting_cooldown = 0;
-    
+    float player_immunity_cooldown = 0;
     int running = 1;
     
     // Main game loop
@@ -169,7 +173,7 @@ int main(void)
         float x_move = get_distance_to_move_on_x(&player, dx, dy, delta_time);
         float y_move = get_distance_to_move_on_y(&player, dx, dy, delta_time);
 
-        // TODO, this works, but player cant fully touch the wall.
+        // TODO, this works, but player cant fully touch the wall unless it lines up by chance.
         if ((player.x_position + x_move) < 0 || (player.x_position + x_move) > WINDOW_WIDTH - PLAYER_SIZE)
             dx = 0;
         if ((player.y_position + y_move) < 0 || (player.y_position + y_move) > WINDOW_HEIGHT - PLAYER_SIZE)
@@ -179,33 +183,54 @@ int main(void)
 
 
         // Move Projectiles
-
         update_projectiles(projectiles);
 
         // Move enemy towards player
         move_enemy_towards_player(&enemy, &player, delta_time);
 
-        // Check collision
+        // Enemy-Player collision.
         if (check_collision(&player, &enemy))
-        {
-            printf("Game Over\n Score: %d\n", score);
+        {   
+            if (player_immunity_cooldown == 0)
+            {   
+                player_immunity_cooldown = PLAYER_IMMUNITY_COOLDOWN;
+                player.health -= enemy.damage;
+                if (player.health <= 0)
+                {
+                    printf("Game Over\n Score: %d\n", score);
+                    score = 0;
+
+                    randomly_position_entity(&player);
+                    player.health = 5;
+                }
+            }
         }
-        
+
         // Bullet collision
         for (int i = 0; i < MAX_PROJECTILES; i++)
         {
-            if (projectiles[i].alive)
+            if (projectiles[i].alive == 0) continue;
+
+            if (check_collision(&projectiles[i], &enemy))
             {
-                if (check_collision(&projectiles[i], &enemy))
+                projectiles[i].alive = 0;
+                enemy.health -= projectiles[i].damage;
+                if (enemy.health <= 0)
                 {
                     randomly_position_entity(&enemy);
-                    projectiles[i].alive = 0;
+                    enemy.health = 3; // refill health, temp before I make multiple enemies.
                     score++;
                 }
             }
         }
-        // Lower shooting cooldown
 
+        // Lower player immunity cooldown
+        if (player_immunity_cooldown > 0)
+        {
+            player_immunity_cooldown -= delta_time;
+            if (player_immunity_cooldown < 0) player_immunity_cooldown = 0;
+        }
+        // Lower shooting cooldown
         if (shooting_cooldown > 0)
         {
             shooting_cooldown -= delta_time;

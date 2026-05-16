@@ -3,6 +3,7 @@
 
 #include "entity.h"
 
+struct Entity create_projectile(int damage);
 int shoot_projectile(struct Entity projectiles[], struct Entity *player, int dx, int dy);
 void update_projectile(struct Entity *projectile);
 void update_projectiles(struct Entity projectiles[]);

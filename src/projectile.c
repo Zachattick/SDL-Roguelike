@@ -1,9 +1,10 @@
 #include "projectile.h"
 
-struct Entity create_projectile(void)
+struct Entity create_projectile(int damage)
 {
     struct Entity projectile = {
         .alive = 1,
+        .damage = damage,
         .movement_speed = 5,
         .x_velocity = 0,
         .y_velocity = 0,
@@ -22,7 +23,7 @@ int shoot_projectile(struct Entity projectiles[], struct Entity *player, int dx,
     }
     int next_slot = get_next_free_projectile_spot(projectiles);
 
-    projectiles[next_slot] = create_projectile();
+    projectiles[next_slot] = create_projectile(player->damage);
 
     projectiles[next_slot].x_position = (player->x_position + (player->size/2) - projectiles[next_slot].size/2);
     projectiles[next_slot].y_position = (player->y_position + (player->size/2) - projectiles[next_slot].size/2);
