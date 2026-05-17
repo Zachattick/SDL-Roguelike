@@ -23,9 +23,9 @@ int main(void)
     printf("TTF_Init(): %s\n", TTF_Init() == 0 ? "Success" : "Error");
 
     // Window and Renderer Setup
-    SDL_Color bg_color = {125, 125, 125, 255};
+    SDL_Color bg_color = {33, 33, 33, 255};
 
-    SDL_Window *window = SDL_CreateWindow("Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
+    SDL_Window *window = SDL_CreateWindow("The Binding Of Izach", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
     if (!window) {
         printf("Error creating window: %s\n", SDL_GetError());
         return 1;
@@ -197,7 +197,7 @@ int main(void)
                 player.health -= enemy.damage;
                 if (player.health <= 0)
                 {
-                    printf("Game Over\n Score: %d\n", score);
+                    printf("Game Over\nScore: %d\n", score);
                     score = 0;
 
                     randomly_position_entity(&player);

@@ -5,7 +5,7 @@ struct Entity create_projectile(int damage)
     struct Entity projectile = {
         .alive = 1,
         .damage = damage,
-        .movement_speed = 5,
+        .movement_speed = 3.5,
         .x_velocity = 0,
         .y_velocity = 0,
         .x_position = -100,

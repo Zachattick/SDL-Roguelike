@@ -7,12 +7,12 @@ void render_score(SDL_Renderer *renderer, TTF_Font *font, int score)
     char score_string[20] = "Score";
     snprintf(score_int_string, sizeof(score_int_string), "%d", score);
 
-    SDL_Surface *score_string_surface = TTF_RenderText_Solid(font, score_string, (SDL_Color){0, 0, 0, 0});
+    SDL_Surface *score_string_surface = TTF_RenderText_Solid(font, score_string, (SDL_Color){0, 99, 0, 0});
     if (score_string_surface == NULL) {
         printf("Error creating text surface: %s\n", TTF_GetError());
         return;
     }
-    SDL_Surface *score_int_surface = TTF_RenderText_Solid(font, score_int_string, (SDL_Color){0, 0, 0, 0});
+    SDL_Surface *score_int_surface = TTF_RenderText_Solid(font, score_int_string, (SDL_Color){0, 120, 0, 0});
     if (score_int_surface == NULL) {
         printf("Error creating text surface: %s\n", TTF_GetError());
         return;
