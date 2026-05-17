@@ -87,5 +87,5 @@ int get_next_free_projectile_spot(struct Entity projectiles[])
             return count;
         }    
     }
-    return 94;
+    return -1;
 }

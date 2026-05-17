@@ -56,21 +56,10 @@ int main(void)
         .y_position = 100,
         .size = PLAYER_SIZE
     };
-    struct Entity enemy = {
-        .alive = 1,
-        .health = 3,
-        .damage = 1,
-        .movement_speed = DEFAULT_ENEMY_SPEED,
-        .x_velocity = 0,
-        .y_velocity = 0,
-        .x_position = 0,
-        .y_position = 0,
-        .size = ENEMY_SIZE
-    };
 
+    struct Entity enemies[MAX_ENEMIES] = {0};
     struct Entity projectiles[MAX_PROJECTILES] = {0};
 
-    randomly_position_entity(&enemy);
     randomly_position_entity(&player);
     
     // Delta time variables
@@ -106,6 +95,7 @@ int main(void)
                 switch (event.key.keysym.sym)
                 {
                     case SDLK_ESCAPE: running = 0; break;
+                    case SDLK_p: spawn_enemy(enemies); break;
                     case SDLK_w: keys.w_pressed = 1; break;
                     case SDLK_s: keys.s_pressed = 1; break;
                     case SDLK_a: keys.a_pressed = 1; break;
@@ -186,44 +176,51 @@ int main(void)
         update_projectiles(projectiles);
 
         // Move enemy towards player
-        move_enemy_towards_player(&enemy, &player, delta_time);
+        update_enemies(enemies, &player, delta_time);
+
 
         // Enemy-Player collision.
-        if (check_collision(&player, &enemy))
+        for (int i = 0; i < MAX_ENEMIES; i++)
         {   
-            if (player_immunity_cooldown == 0)
+            struct Entity* enemyp = &enemies[i];
+            if (check_collision(&player, enemyp))
             {   
-                player_immunity_cooldown = PLAYER_IMMUNITY_COOLDOWN;
-                player.health -= enemy.damage;
-                if (player.health <= 0)
-                {
-                    printf("Game Over\nScore: %d\n", score);
-                    score = 0;
+                if (player_immunity_cooldown == 0)
+                {   
+                    player_immunity_cooldown = PLAYER_IMMUNITY_COOLDOWN;
+                    player.health -= enemyp->damage;
+                    if (player.health <= 0)
+                    {
+                        printf("Game Over\nScore: %d\n", score);
+                        score = 0;
 
-                    randomly_position_entity(&player);
-                    player.health = 5;
+                        randomly_position_entity(&player);
+                        player.health = 5;
+                    }
                 }
             }
         }
-
         // Bullet collision
-        for (int i = 0; i < MAX_PROJECTILES; i++)
+        for (int e = 0; e < MAX_ENEMIES; e++)
         {
-            if (projectiles[i].alive == 0) continue;
+            if (enemies[e].alive == 0) continue;
 
-            if (check_collision(&projectiles[i], &enemy))
+            for (int i = 0; i < MAX_PROJECTILES; i++)
             {
-                projectiles[i].alive = 0;
-                enemy.health -= projectiles[i].damage;
-                if (enemy.health <= 0)
+                if (projectiles[i].alive == 0) continue;
+
+                if (check_collision(&projectiles[i], &enemies[e]))
                 {
-                    randomly_position_entity(&enemy);
-                    enemy.health = 3; // refill health, temp before I make multiple enemies.
-                    score++;
+                    projectiles[i].alive = 0;
+                    enemies[e].health -= projectiles[i].damage;
+                    if (enemies[e].health <= 0)
+                    {
+                        enemies[e].alive = 0;
+                        score++;
+                    }
                 }
             }
         }
-
         // Lower player immunity cooldown
         if (player_immunity_cooldown > 0)
         {
@@ -242,7 +239,12 @@ int main(void)
         SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
         SDL_RenderClear(renderer);
         // Draw enemy
-        render_entity(renderer, &enemy, (SDL_Color){255, 0, 0, 255});
+        for (int i = 0; i < MAX_ENEMIES; i++)
+        {
+            if (enemies[i].alive == 0) continue;
+
+            render_entity(renderer, &enemies[i], (SDL_Color){255, 0, 0, 255});
+        }
         // Draw player
         render_entity(renderer, &player, (SDL_Color){15, 255, 25, 255});
         // Draw projectiles
