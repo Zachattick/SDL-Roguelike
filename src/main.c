@@ -70,7 +70,7 @@ int main(void)
     
     // Variable Setup
     SDL_Event event;
-    struct key_state keys = {0, 0, 0, 0};
+    struct key_state keys = {0, 0, 0, 0, 0, 0, 0, 0};
     int score = 0;
     float shooting_cooldown = 0;
     float player_immunity_cooldown = 0;
@@ -100,42 +100,10 @@ int main(void)
                     case SDLK_s: keys.s_pressed = 1; break;
                     case SDLK_a: keys.a_pressed = 1; break;
                     case SDLK_d: keys.d_pressed = 1; break;
-                    case SDLK_UP:
-                    {
-                        if (shooting_cooldown <= 0)
-                        {
-                            shoot_projectile(projectiles, &player, 0, -1); 
-                            shooting_cooldown = SHOOTING_COOLDOWN;
-                        }
-                        break;
-                    }
-                    case SDLK_DOWN:
-                    {
-                        if (shooting_cooldown <= 0)
-                        {
-                            shoot_projectile(projectiles, &player, 0, 1); 
-                            shooting_cooldown = SHOOTING_COOLDOWN;
-                        }
-                        break;
-                    }
-                    case SDLK_LEFT:
-                    {
-                        if (shooting_cooldown <= 0)
-                        {
-                            shoot_projectile(projectiles, &player, -1, 0); 
-                            shooting_cooldown = SHOOTING_COOLDOWN;
-                        }
-                        break;
-                    }
-                    case SDLK_RIGHT:
-                    {
-                        if (shooting_cooldown <= 0)
-                        {
-                            shoot_projectile(projectiles, &player, 1, 0); 
-                            shooting_cooldown = SHOOTING_COOLDOWN;
-                        }
-                        break;
-                    } 
+                    case SDLK_UP: keys.up_pressed = 1; break;
+                    case SDLK_DOWN: keys.down_pressed = 1; break;
+                    case SDLK_LEFT: keys.left_pressed = 1; break;
+                    case SDLK_RIGHT: keys.right_pressed = 1; break;
                 }
             }
             else if (event.type == SDL_KEYUP)
@@ -146,9 +114,23 @@ int main(void)
                     case SDLK_s: keys.s_pressed = 0; break;
                     case SDLK_a: keys.a_pressed = 0; break;
                     case SDLK_d: keys.d_pressed = 0; break;
+                    case SDLK_UP: keys.up_pressed = 0; break;
+                    case SDLK_DOWN: keys.down_pressed = 0; break;
+                    case SDLK_LEFT: keys.left_pressed = 0; break;
+                    case SDLK_RIGHT: keys.right_pressed = 0; break;
                 }
             }   
         }
+
+        // Shooting // TODO, If holding multiple keys, one always takes priority.
+        if (shooting_cooldown <= 0)
+        {
+            if (keys.up_pressed) {shoot_projectile(projectiles, &player, 0, -1); shooting_cooldown = SHOOTING_COOLDOWN;}
+            else if (keys.down_pressed) {shoot_projectile(projectiles, &player, 0, 1); shooting_cooldown = SHOOTING_COOLDOWN;}
+            else if (keys.left_pressed) {shoot_projectile(projectiles, &player, -1, 0); shooting_cooldown = SHOOTING_COOLDOWN;}
+            else if (keys.right_pressed) {shoot_projectile(projectiles, &player, 1, 0); shooting_cooldown = SHOOTING_COOLDOWN;}
+        }    
+
         // Player movement logic
 
         float dx = 0;
