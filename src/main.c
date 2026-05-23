@@ -165,6 +165,9 @@ int main(void)
         for (int i = 0; i < MAX_ENEMIES; i++)
         {   
             struct Entity* enemyp = &enemies[i];
+
+            if (enemyp->alive == 0) continue;
+
             if (check_collision(&player, enemyp))
             {   
                 if (player_immunity_cooldown == 0)
