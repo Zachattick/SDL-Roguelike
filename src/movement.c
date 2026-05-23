@@ -1,5 +1,11 @@
 #include "movement.h"
 
+void place_entity_at_location(struct Entity* entity, float x, float y)
+{
+    entity->x_position = x;
+    entity->y_position = y;
+}
+
 void move_entity(struct Entity* entity, float dx, float dy, float dt)
 {
     float length = sqrtf((dx * dx) + (dy * dy));

@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "entity.h"
+#include "collision.h"
 #include "utils.h"
 #include "movement.h"
 

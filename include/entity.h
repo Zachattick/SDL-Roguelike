@@ -7,6 +7,7 @@
 
 struct Entity {
     int alive;
+    int moved_last_frame;
     float health;
     float damage;
     float movement_speed;

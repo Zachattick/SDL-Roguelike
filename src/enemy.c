@@ -6,7 +6,7 @@ struct Entity create_enemy(void)
         .alive = 1,
         .health = 3,
         .damage = 1,
-        .movement_speed = DEFAULT_ENEMY_SPEED,
+        .movement_speed = DEFAULT_ENEMY_SPEED * ((rand_int(1,3) * 0.1) + 0.8),
         .x_velocity = 0,
         .y_velocity = 0,
         .x_position = 0,
@@ -34,7 +34,22 @@ void update_enemies(struct Entity enemies[], struct Entity *player, float dt)
     {
         if (enemies[i].alive == 0) continue;
 
+        int old_x = enemies[i].x_position;
+        int old_y = enemies[i].y_position;
+
         move_enemy_towards_player(&enemies[i], player, dt);
+
+        // Check collision with other enemies
+        for (int j = 0; j < MAX_ENEMIES; j++)
+        {
+            if (i == j) continue;
+            if (enemies[j].alive == 0) continue;
+
+            if (check_collision(&enemies[i], &enemies[j]))
+            {
+                place_entity_at_location(&enemies[i], old_x, old_y);
+            }
+        }
     }
 }
 
