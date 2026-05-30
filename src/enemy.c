@@ -34,36 +34,25 @@ void update_enemies(struct Entity enemies[], struct Entity *player, float dt)
     {
         if (enemies[i].alive == 0) continue;
 
-        int old_x = enemies[i].x_position;
-        int old_y = enemies[i].y_position;
-
         move_enemy_towards_player(&enemies[i], player, dt);
 
-        // Check collision with other enemies
-        for (int j = 0; j < MAX_ENEMIES; j++)
-        {
-            if (i == j) continue;
-            if (enemies[j].alive == 0) continue;
-
-            if (check_collision(&enemies[i], &enemies[j]))
-            {
-                place_entity_at_location(&enemies[i], old_x, old_y);
-            }
-        }
     }
 }
 
 void move_enemy_towards_player(struct Entity *enemy, struct Entity *player, float dt)
+{   
+    struct Vector2D normalized_direction = get_enemy_move(enemy, player);
+    move_entity(enemy, normalized_direction, dt);
+}
+
+struct Vector2D get_enemy_move(struct Entity *enemy, struct Entity *player)
 {
-    float dx = (player->x_position + (player->size/2)) - (enemy->x_position + (enemy->size/2));
-    float dy = (player->y_position + (player->size/2)) - (enemy->y_position + (enemy->size/2));
+    struct Vector2D direction = {
+        .x = (player->x_position + (player->size / 2)) - (enemy->x_position + (enemy->size / 2)),
+        .y = (player->y_position + (player->size / 2)) - (enemy->y_position + (enemy->size / 2))
+    };
 
-    float length = sqrtf(dx * dx + dy * dy);
-
-    dx /= length;
-    dy /= length;
-
-    move_entity(enemy, dx, dy, dt);
+    return normalize_vector(direction);
 }
 
 int get_live_enemies(struct Entity enemies[])

@@ -133,26 +133,21 @@ int main(void)
 
         // Player movement logic
 
-        float dx = 0;
-        float dy = 0;
+        struct Vector2D direction = {0, 0};
 
-        if (keys.w_pressed) dy -= 1;
-        if (keys.s_pressed) dy += 1;
-        if (keys.a_pressed) dx -= 1;
-        if (keys.d_pressed) dx += 1;
+        if (keys.w_pressed) direction.y -= 1;
+        if (keys.s_pressed) direction.y += 1;
+        if (keys.a_pressed) direction.x -= 1;
+        if (keys.d_pressed) direction.x += 1;
 
-        // Move player, If player is inside the window.
-        float x_move = get_distance_to_move_on_x(&player, dx, dy, delta_time);
-        float y_move = get_distance_to_move_on_y(&player, dx, dy, delta_time);
-
-        // TODO, this works, but player cant fully touch the wall unless it lines up by chance.
-        if ((player.x_position + x_move) < 0 || (player.x_position + x_move) > WINDOW_WIDTH - PLAYER_SIZE)
-            dx = 0;
-        if ((player.y_position + y_move) < 0 || (player.y_position + y_move) > WINDOW_HEIGHT - PLAYER_SIZE)
-            dy = 0;
-
-        move_entity(&player, dx, dy, delta_time);
-
+        direction = normalize_vector(direction);
+        move_entity(&player, direction, delta_time);
+        
+        // If player is out of bounds slightly, move them back in bounds. // This feels like a hacky solution, but it works for now. TODO: Decide if I want to implement a better solution for this.
+        if (player.x_position < 0) player.x_position = 0;
+        if (player.x_position > WINDOW_WIDTH - PLAYER_SIZE) player.x_position = WINDOW_WIDTH - PLAYER_SIZE;
+        if (player.y_position < 0) player.y_position = 0;
+        if (player.y_position > WINDOW_HEIGHT - PLAYER_SIZE) player.y_position = WINDOW_HEIGHT - PLAYER_SIZE;
 
         // Move Projectiles
         update_projectiles(projectiles);

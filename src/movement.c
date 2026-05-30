@@ -1,4 +1,6 @@
 #include "movement.h"
+#include "entity.h"
+#include "utils.h"
 
 void place_entity_at_location(struct Entity* entity, float x, float y)
 {
@@ -6,42 +8,11 @@ void place_entity_at_location(struct Entity* entity, float x, float y)
     entity->y_position = y;
 }
 
-void move_entity(struct Entity* entity, float dx, float dy, float dt)
+void move_entity(struct Entity* entity, struct Vector2D direction, float dt)
 {
-    float length = sqrtf((dx * dx) + (dy * dy));
+    // DOES NOT normalize the direction vector, it should be normalized before calling this function. 
+    // Allows for wider use of this function, as it can be used for any direction vector, normalized or not.
 
-    if (length != 0)
-    {
-        dx /= length;
-        dy /= length;
-    }
-
-    entity->x_position += dt * dx * entity->movement_speed;
-    entity->y_position += dt * dy * entity->movement_speed;
-}
-
-float get_distance_to_move_on_x(struct Entity* entity, float dx, float dy, float dt)
-{
-    float length = sqrtf((dx * dx) + (dy * dy));
-
-    if (length != 0)
-    {
-        dx /= length;
-        dy /= length;
-    }
-
-    return dt * dx * entity->movement_speed;
-}
-
-float get_distance_to_move_on_y(struct Entity* entity, float dx, float dy, float dt)
-{
-    float length = sqrtf((dx * dx) + (dy * dy));
-
-    if (length != 0)
-    {
-        dx /= length;
-        dy /= length;
-    }
-
-    return dt * dy * entity->movement_speed;   
+    entity->x_position += dt * direction.x * entity->movement_speed;
+    entity->y_position += dt * direction.y * entity->movement_speed;
 }
