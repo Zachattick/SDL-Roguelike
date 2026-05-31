@@ -14,5 +14,7 @@ void update_enemies(struct Entity enemies[], struct Entity *player, float dt);
 struct Vector2D get_enemy_move(struct Entity *enemy, struct Entity *player);
 int get_live_enemies(struct Entity enemies[]);
 int get_next_free_enemy_spot(struct Entity enemies[]);
+void destroy_enemy(struct Entity *enemy);
+void destroy_all_enemies(struct Entity enemies[]);
 
 #endif

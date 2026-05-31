@@ -89,3 +89,16 @@ int get_next_free_projectile_spot(struct Entity projectiles[])
     }
     return -1;
 }
+
+void destroy_projectile(struct Entity *projectile)
+{
+    projectile->alive = 0;
+}
+
+void destroy_all_projectiles(struct Entity projectiles[])
+{
+    for (int i = 0; i < MAX_PROJECTILES; i++)
+    {
+        destroy_projectile(&projectiles[i]);
+    }
+}

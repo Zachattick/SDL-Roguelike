@@ -19,8 +19,9 @@ int main(void)
 {
     // Initialization
     srand(time(NULL));
-    printf("SDL_Init(): %s\n", SDL_Init(SDL_INIT_VIDEO) == 0 ? "Success" : "Error");
-    printf("TTF_Init(): %s\n", TTF_Init() == 0 ? "Success" : "Error");
+
+    SDL_Init(SDL_INIT_VIDEO);
+    TTF_Init();
 
     // Window and Renderer Setup
     SDL_Color bg_color = {33, 33, 33, 255};
@@ -42,7 +43,6 @@ int main(void)
         printf("Error loading font: %s\n", TTF_GetError());
         return 1;
     }
-
     
     // Game Setup
     struct Entity player = {
@@ -75,7 +75,12 @@ int main(void)
     float shooting_cooldown = 0;
     float player_immunity_cooldown = 0;
     int running = 1;
+    int current_wave = 1;
+    float next_wave_timer = WAVE_DELAY;
     
+    // Debug Cooldown 
+    float debug_cooldown = DEBUG_COOLDOWN;
+
     // Main game loop
     while (running)
     {   
@@ -122,6 +127,37 @@ int main(void)
             }   
         }
 
+    // Enemy spawning logic
+
+        // lower wave timer
+        if (next_wave_timer > 0)
+            next_wave_timer -= delta_time;
+
+        if (next_wave_timer <= 0)
+        {
+            int all_enemies_dead = 1;
+            for (int i = 0; i < MAX_ENEMIES; i++)
+            {
+                if (enemies[i].alive == 1)
+                {
+                    all_enemies_dead = 0;
+                    break;
+                }
+            }
+
+            if (all_enemies_dead)
+            {
+                current_wave++;
+                next_wave_timer = WAVE_DELAY;
+
+                // Spawn new wave of enemies
+                for (int i = 0; i < current_wave && i < MAX_ENEMIES; i++)
+                {
+                    spawn_enemy(enemies);
+                }
+            }
+        } 
+
         // Shooting // TODO, If holding multiple keys, one always takes priority.
         if (shooting_cooldown <= 0)
         {
@@ -131,8 +167,7 @@ int main(void)
             else if (keys.right_pressed) {shoot_projectile(projectiles, &player, 1, 0); shooting_cooldown = SHOOTING_COOLDOWN;}
         }    
 
-        // Player movement logic
-
+    // Player movement logic
         struct Vector2D direction = {0, 0};
 
         if (keys.w_pressed) direction.y -= 1;
@@ -143,20 +178,20 @@ int main(void)
         direction = normalize_vector(direction);
         move_entity(&player, direction, delta_time);
         
-        // If player is out of bounds slightly, move them back in bounds. // This feels like a hacky solution, but it works for now. TODO: Decide if I want to implement a better solution for this.
+        // If player is out of bounds, move them back in bounds. // This feels like a hacky solution, but it works for now. TODO: Decide if I want to implement a better solution for this.
         if (player.x_position < 0) player.x_position = 0;
         if (player.x_position > WINDOW_WIDTH - PLAYER_SIZE) player.x_position = WINDOW_WIDTH - PLAYER_SIZE;
         if (player.y_position < 0) player.y_position = 0;
         if (player.y_position > WINDOW_HEIGHT - PLAYER_SIZE) player.y_position = WINDOW_HEIGHT - PLAYER_SIZE;
 
-        // Move Projectiles
+    // Move Projectiles
         update_projectiles(projectiles);
 
-        // Move enemy towards player
+    // Move enemies towards player
         update_enemies(enemies, &player, delta_time);
 
-
-        // Enemy-Player collision.
+    // Collision detection
+        // Player-Enemy collision.
         for (int i = 0; i < MAX_ENEMIES; i++)
         {   
             struct Entity* enemyp = &enemies[i];
@@ -172,7 +207,13 @@ int main(void)
                     if (player.health <= 0)
                     {
                         printf("Game Over\nScore: %d\n", score);
+                        
+                        destroy_all_enemies(enemies);
+                        destroy_all_projectiles(projectiles);
+
                         score = 0;
+                        next_wave_timer = WAVE_DELAY;
+                        current_wave = 1;
 
                         randomly_position_entity(&player);
                         player.health = 5;
@@ -197,10 +238,18 @@ int main(void)
                     {
                         enemies[e].alive = 0;
                         score++;
+
+                        printf("%d enemies remaining\n", get_live_enemies(enemies));
+                        if (get_live_enemies(enemies) == 0)
+                        {
+                            next_wave_timer = WAVE_DELAY;
+                        }
                     }
                 }
             }
         }
+
+    // Cooldown management
         // Lower player immunity cooldown
         if (player_immunity_cooldown > 0)
         {
@@ -214,8 +263,17 @@ int main(void)
             if (shooting_cooldown < 0) shooting_cooldown = 0;
         }
 
-        // Draw everything
-        
+        // Print debug info
+        if (debug_cooldown > 0)
+            debug_cooldown -= delta_time;
+        else
+        {
+            debug_cooldown = DEBUG_COOLDOWN;
+            printf("Wave: %d | Next Wave In: %.2f seconds | Live Enemies: %d | Player Health: %.2f | Score: %d\n", current_wave, next_wave_timer, get_live_enemies(enemies), player.health, score);
+        }
+
+
+        // Draw everything        
         SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
         SDL_RenderClear(renderer);
         // Draw enemies
@@ -236,6 +294,7 @@ int main(void)
         // Draw score
         render_score(renderer, font, score);
         SDL_RenderPresent(renderer);
+    
     }
     
     TTF_CloseFont(font);

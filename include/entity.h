@@ -12,6 +12,7 @@ struct Entity {
     float health;
     float damage;
     float movement_speed;
+    float time_until_can_move;
     float x_position, y_position;
     float x_velocity, y_velocity;
     float size;
