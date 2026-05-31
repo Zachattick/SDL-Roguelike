@@ -180,7 +180,7 @@ int main(void)
                 }
             }
         }
-        // Bullet collision
+        // Bullet/Enemy collision
         for (int e = 0; e < MAX_ENEMIES; e++)
         {
             if (enemies[e].alive == 0) continue;
@@ -218,12 +218,12 @@ int main(void)
         
         SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
         SDL_RenderClear(renderer);
-        // Draw enemy
+        // Draw enemies
         for (int i = 0; i < MAX_ENEMIES; i++)
         {
             if (enemies[i].alive == 0) continue;
 
-            render_entity(renderer, &enemies[i], (SDL_Color){255, 0, 0, 255});
+            render_entity(renderer, &enemies[i], (SDL_Color){64 + enemies[i].health/enemies[i].max_health * 128, 0, enemies[i].health/enemies[i].max_health * 64, 255});
         }
         // Draw player
         render_entity(renderer, &player, (SDL_Color){15, 255, 25, 255});

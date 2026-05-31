@@ -4,7 +4,8 @@ struct Entity create_enemy(void)
 {
     struct Entity enemy = {
         .alive = 1,
-        .health = 3,
+        .max_health = 7,
+        .health = enemy.max_health,
         .damage = 1,
         .movement_speed = DEFAULT_ENEMY_SPEED * ((rand_int(1,3) * 0.1) + 0.8),
         .x_velocity = 0,
@@ -35,7 +36,6 @@ void update_enemies(struct Entity enemies[], struct Entity *player, float dt)
         if (enemies[i].alive == 0) continue;
 
         move_enemy_towards_player(&enemies[i], player, dt);
-
     }
 }
 
