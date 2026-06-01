@@ -4,7 +4,7 @@ struct Entity create_enemy(void)
 {
     struct Entity enemy = {
         .alive = 1,
-        .max_health = 7,
+        .max_health = DEFAULT_ENEMY_HEALTH,
         .health = enemy.max_health,
         .damage = 1,
         .movement_speed = DEFAULT_ENEMY_SPEED * ((rand_int(1,5) * 0.2) + 0.8),

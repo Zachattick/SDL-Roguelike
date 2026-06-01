@@ -47,7 +47,7 @@ int main(void)
     // Game Setup
     struct Entity player = {
         .alive = 1,
-        .health = 5,
+        .health = DEFAULT_PLAYER_HEALTH,
         .damage = 1,
         .movement_speed = DEFAULT_PLAYER_SPEED,
         .x_velocity = 0,
@@ -203,7 +203,7 @@ int main(void)
                 if (player_immunity_cooldown == 0)
                 {   
                     player_immunity_cooldown = PLAYER_IMMUNITY_COOLDOWN;
-                    player.health -= enemyp->damage;
+                    player.health -= enemyp->damage * (1 + (0.1 * rand_int(0, 5))); // 1-1.5x damage multiplier
                     if (player.health <= 0)
                     {
                         printf("Game Over\nScore: %d\n", score);
@@ -216,7 +216,7 @@ int main(void)
                         current_wave = 1;
 
                         randomly_position_entity(&player);
-                        player.health = 5;
+                        player.health = DEFAULT_PLAYER_HEALTH;
                     }
                 }
             }
@@ -238,12 +238,10 @@ int main(void)
                     {
                         enemies[e].alive = 0;
                         score++;
-
-                        printf("%d enemies remaining\n", get_live_enemies(enemies));
+                        
+                        // If the last enemy is dies, set the wave timer to WAVE_DELAY
                         if (get_live_enemies(enemies) == 0)
-                        {
                             next_wave_timer = WAVE_DELAY;
-                        }
                     }
                 }
             }

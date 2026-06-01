@@ -10,6 +10,9 @@
 #define DEFAULT_PLAYER_SPEED 300.0
 #define DEFAULT_ENEMY_SPEED 75.0
 
+#define DEFAULT_PLAYER_HEALTH 10.0
+#define DEFAULT_ENEMY_HEALTH 5.0
+
 #define MAX_ENEMIES 10
 #define ENEMY_SIZE 25
 #define TIME_UNTIL_ENEMY_CAN_MOVE 1 // SECONDS - Time after spawning before an enemy can move
