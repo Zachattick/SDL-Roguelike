@@ -3,6 +3,7 @@
 #include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_image.h>
 
 #include "score.h"
 #include "entity.h"
@@ -21,6 +22,7 @@ int main(void)
     srand(time(NULL));
 
     SDL_Init(SDL_INIT_VIDEO);
+    IMG_Init(IMG_INIT_PNG);
     TTF_Init();
 
     // Window and Renderer Setup
@@ -33,6 +35,15 @@ int main(void)
     TTF_Font *font = TTF_OpenFont("assets/fonts/Morgenta.ttf", 16);
     if (!font) { printf("Error loading font: %s\n", TTF_GetError()); return 1;}
     
+    // Image setup
+    SDL_Surface *player_surface = IMG_Load("assets/art/circle_face.png");
+    if (!player_surface) { printf("Error loading player image: %s\n", IMG_GetError()); return 1; }
+
+    SDL_Texture *player_texture = SDL_CreateTextureFromSurface(renderer, player_surface);
+    if (!player_texture) { printf("Error creating player texture: %s\n", SDL_GetError()); return 1; }
+    SDL_FreeSurface(player_surface);
+
+
     // Game Setup
     struct Entity player = {
         .alive = 1,
@@ -271,7 +282,8 @@ int main(void)
             render_entity(renderer, &enemies[i], (SDL_Color){64 + enemies[i].health/enemies[i].max_health * 128, 0, enemies[i].health/enemies[i].max_health * 64, 255});
         }
         // Draw player
-        render_entity(renderer, &player, (SDL_Color){15, 255, 25, 255});
+        SDL_RenderCopy(renderer, player_texture, NULL, &(SDL_Rect){player.x_position, player.y_position, player.size, player.size});
+        // render_entity(renderer, &player, (SDL_Color){15, 255, 25, 255});
         // Draw projectiles
         for (int i = 0; i < MAX_PROJECTILES; i++)
         {   
@@ -280,6 +292,8 @@ int main(void)
         }
         // Draw score
         render_score(renderer, font, score);
+
+        // Draw Everything to the screen
         SDL_RenderPresent(renderer);
     
     }
