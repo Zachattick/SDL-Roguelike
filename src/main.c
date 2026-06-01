@@ -27,22 +27,11 @@ int main(void)
     SDL_Color bg_color = {33, 33, 33, 255};
 
     SDL_Window *window = SDL_CreateWindow("The Binding Of Izach", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH, WINDOW_HEIGHT, 0);
-    if (!window) {
-        printf("Error creating window: %s\n", SDL_GetError());
-        return 1;
-    }
+    if (!window) { printf("Error creating window: %s\n", SDL_GetError()); return 1;}
     SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer) {
-        printf("Error creating renderer: %s\n", SDL_GetError());
-        SDL_DestroyWindow(window);
-        return 1;
-    }
-    
+    if (!renderer) { printf("Error creating renderer: %s\n", SDL_GetError()); SDL_DestroyWindow(window); return 1;}
     TTF_Font *font = TTF_OpenFont("assets/fonts/Morgenta.ttf", 16);
-    if (!font) {
-        printf("Error loading font: %s\n", TTF_GetError());
-        return 1;
-    }
+    if (!font) { printf("Error loading font: %s\n", TTF_GetError()); return 1;}
     
     // Game Setup
     struct Entity player = {
