@@ -36,12 +36,20 @@ int main(void)
     if (!font) { printf("Error loading font: %s\n", TTF_GetError()); return 1;}
     
     // Image setup
-    SDL_Surface *player_surface = IMG_Load("assets/art/circle_face.png");
-    if (!player_surface) { printf("Error loading player image: %s\n", IMG_GetError()); return 1; }
+    SDL_Surface *player_regular_surface = IMG_Load("assets/art/player.png");
+    if (!player_regular_surface) { printf("Error loading player image: %s\n", IMG_GetError()); return 1; }
+    SDL_Surface *player_damaged_surface = IMG_Load("assets/art/player-damaged.png");
+    if (!player_damaged_surface) { printf("Error loading damaged player image: %s\n", IMG_GetError()); return 1; }
 
-    SDL_Texture *player_texture = SDL_CreateTextureFromSurface(renderer, player_surface);
-    if (!player_texture) { printf("Error creating player texture: %s\n", SDL_GetError()); return 1; }
-    SDL_FreeSurface(player_surface);
+    SDL_Texture *player_regular_texture = SDL_CreateTextureFromSurface(renderer, player_regular_surface);
+    if (!player_regular_texture) { printf("Error creating player texture: %s\n", SDL_GetError()); return 1; }
+    SDL_Texture *player_damaged_texture = SDL_CreateTextureFromSurface(renderer, player_damaged_surface);
+    if (!player_damaged_texture) { printf("Error creating damaged player texture: %s\n", SDL_GetError()); return 1; }
+    
+    SDL_FreeSurface(player_regular_surface);
+    SDL_FreeSurface(player_damaged_surface);
+
+    SDL_Texture *player_texture = player_regular_texture;
 
 
     // Game Setup
@@ -250,10 +258,16 @@ int main(void)
     // Cooldown management
         // Lower player immunity cooldown
         if (player_immunity_cooldown > 0)
-        {
+        {   
+            player_texture = player_damaged_texture;
             player_immunity_cooldown -= delta_time;
             if (player_immunity_cooldown < 0) player_immunity_cooldown = 0;
         }
+        else
+        {
+            player_texture = player_regular_texture;
+        }
+
         // Lower shooting cooldown
         if (shooting_cooldown > 0)
         {
@@ -284,6 +298,8 @@ int main(void)
         // Draw player
         SDL_RenderCopy(renderer, player_texture, NULL, &(SDL_Rect){player.x_position, player.y_position, player.size, player.size});
         // render_entity(renderer, &player, (SDL_Color){15, 255, 25, 255});
+
+
         // Draw projectiles
         for (int i = 0; i < MAX_PROJECTILES; i++)
         {   
